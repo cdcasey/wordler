@@ -24,7 +24,7 @@ export function LetterKind({
 	...props
 }: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
 	return (
-		<Button variant="ghost" size="icon" className={cn("rounded-full w-fit h-fit", className)} {...props}>
+		<Button variant="ghost" size="icon" className={cn("h-fit w-fit rounded-full", className)} {...props}>
 			<CircleIcon className={cn(buttonVariants({ variant }))} />
 		</Button>
 	);

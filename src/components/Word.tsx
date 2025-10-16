@@ -1,10 +1,10 @@
-import React from "react";
-import { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input.tsx";
 import { LetterKind } from "@/components/LetterKind.tsx";
 
 export function Word() {
+	// const [word, setWord] = useState(["", "", "", "", ""]);
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -58,7 +58,7 @@ export function Word() {
 						}}
 						type="text"
 						maxLength={1}
-						className="h-13 w-13 text-4xl! uppercase text-center font-bold rounded-none"
+						className="h-13 w-13 rounded-none text-center text-4xl! font-bold uppercase"
 						onChange={(e) => handleChange(e, value)}
 						onKeyDown={(e) => handleKeyDown(e, value)}
 						onPaste={handlePaste}
