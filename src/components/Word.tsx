@@ -13,7 +13,7 @@ export function Word() {
 		{ letter: "", color: "" },
 	]);
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-	console.log(word);
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
 		const value = e.currentTarget.value;
 		const tempWord = [...word];
