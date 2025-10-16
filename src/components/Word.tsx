@@ -64,7 +64,7 @@ export function Word() {
 	return (
 		<div className="flex gap-2">
 			{[0, 1, 2, 3, 4].map((value) => (
-				<div className="flex flex-col gap-2" key={value}>
+				<div className="flex flex-col gap-2 text-center" key={value}>
 					<Input
 						// ref={inputRefs.current[value]}
 						ref={(el) => {
