@@ -64,9 +64,9 @@ export function Word() {
 						onPaste={handlePaste}
 					/>
 					<div>
-						<LetterKind />
-						<LetterKind />
-						<LetterKind />
+						<LetterKind variant="green" />
+						<LetterKind variant="yellow" />
+						<LetterKind variant="gray" />
 					</div>
 				</div>
 			))}

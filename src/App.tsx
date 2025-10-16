@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { Word } from "@/components/Word.tsx";
 import "./App.css";
@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 
 function App() {
 	const [wordList, setWordList] = useState([1]);
-	console.log({ wordList });
 
 	return (
 		<>
