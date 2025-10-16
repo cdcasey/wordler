@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input.tsx";
 import { LetterKind } from "@/components/LetterKind.tsx";
+import { cn } from "@/lib/utils.ts";
 
 export function Word() {
 	const [word, setWord] = useState([
@@ -72,7 +73,11 @@ export function Word() {
 						}}
 						type="text"
 						maxLength={1}
-						className="h-13 w-13 rounded-none text-center text-4xl! font-bold uppercase"
+						className={cn("h-13 w-13 rounded-none text-center text-4xl! font-bold uppercase", {
+							"bg-green-500": word[value].color === "green",
+							"bg-yellow-500": word[value].color === "yellow",
+							"bg-gray-300": word[value].color === "gray",
+						})}
 						value={word[value].letter}
 						onChange={(e) => handleChange(e, value)}
 						onKeyDown={(e) => handleKeyDown(e, value)}
