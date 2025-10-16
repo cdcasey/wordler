@@ -4,13 +4,19 @@ import { Input } from "@/components/ui/input.tsx";
 import { LetterKind } from "@/components/LetterKind.tsx";
 
 export function Word() {
-	const [word, setWord] = useState(["", "", "", "", ""]);
+	const [word, setWord] = useState([
+		{ letter: "", color: "" },
+		{ letter: "", color: "" },
+		{ letter: "", color: "" },
+		{ letter: "", color: "" },
+		{ letter: "", color: "" },
+	]);
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-
+	console.log(word);
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
 		const value = e.currentTarget.value;
 		const tempWord = [...word];
-		tempWord[index] = value;
+		tempWord[index].letter = value;
 		setWord(tempWord);
 		// If a character is entered and it's not the last field, move to next
 		if (value.length === 1 && index < inputRefs.current.length - 1) {
@@ -48,6 +54,12 @@ export function Word() {
 		inputRefs.current[focusIndex]?.focus();
 	};
 
+	const handleColorClick = (index: number, color: "green" | "yellow" | "gray") => {
+		const tempWord = [...word];
+		tempWord[index].color = color;
+		setWord(tempWord);
+	};
+
 	return (
 		<div className="flex gap-2">
 			{[0, 1, 2, 3, 4].map((value) => (
@@ -61,15 +73,27 @@ export function Word() {
 						type="text"
 						maxLength={1}
 						className="h-13 w-13 rounded-none text-center text-4xl! font-bold uppercase"
-						value={word[value]}
+						value={word[value].letter}
 						onChange={(e) => handleChange(e, value)}
 						onKeyDown={(e) => handleKeyDown(e, value)}
 						onPaste={handlePaste}
 					/>
 					<div>
-						<LetterKind variant="green" letter={word[value]} />
-						<LetterKind variant="yellow" letter={word[value]} />
-						<LetterKind variant="gray" letter={word[value]} />
+						<LetterKind
+							variant="green"
+							selected={word[value].color === "green"}
+							onClick={() => handleColorClick(value, "green")}
+						/>
+						<LetterKind
+							variant="yellow"
+							selected={word[value].color === "yellow"}
+							onClick={() => handleColorClick(value, "yellow")}
+						/>
+						<LetterKind
+							variant="gray"
+							selected={word[value].color === "gray"}
+							onClick={() => handleColorClick(value, "gray")}
+						/>
 					</div>
 				</div>
 			))}
