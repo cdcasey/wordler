@@ -18,11 +18,12 @@ const buttonVariants = cva("stroke-none", {
 	},
 });
 
-export function LetterKind({
-	className,
-	variant,
-	...props
-}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
+interface LetterKindProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+	letter: string;
+}
+
+export function LetterKind({ letter, className, variant, ...props }: LetterKindProps) {
+	console.log("LetterKind", letter, variant);
 	return (
 		<Button variant="ghost" size="icon" className={cn("h-fit w-fit rounded-full", className)} {...props}>
 			<CircleIcon className={cn(buttonVariants({ variant }))} />

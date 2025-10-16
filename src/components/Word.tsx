@@ -4,12 +4,14 @@ import { Input } from "@/components/ui/input.tsx";
 import { LetterKind } from "@/components/LetterKind.tsx";
 
 export function Word() {
-	// const [word, setWord] = useState(["", "", "", "", ""]);
+	const [word, setWord] = useState(["", "", "", "", ""]);
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
 		const value = e.currentTarget.value;
-
+		const tempWord = [...word];
+		tempWord[index] = value;
+		setWord(tempWord);
 		// If a character is entered and it's not the last field, move to next
 		if (value.length === 1 && index < inputRefs.current.length - 1) {
 			inputRefs.current[index + 1]?.focus();
@@ -59,14 +61,15 @@ export function Word() {
 						type="text"
 						maxLength={1}
 						className="h-13 w-13 rounded-none text-center text-4xl! font-bold uppercase"
+						value={word[value]}
 						onChange={(e) => handleChange(e, value)}
 						onKeyDown={(e) => handleKeyDown(e, value)}
 						onPaste={handlePaste}
 					/>
 					<div>
-						<LetterKind variant="green" />
-						<LetterKind variant="yellow" />
-						<LetterKind variant="gray" />
+						<LetterKind variant="green" letter={word[value]} />
+						<LetterKind variant="yellow" letter={word[value]} />
+						<LetterKind variant="gray" letter={word[value]} />
 					</div>
 				</div>
 			))}
