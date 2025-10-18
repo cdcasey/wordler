@@ -3,38 +3,36 @@ import { useReducer, useState } from "react";
 import { Guess } from "@/components/Guess.tsx";
 import "./App.css";
 import { Button } from "@/components/ui/button.tsx";
-import { Plus } from "lucide-react";
+
 import { PossibleWords } from "@/components/PossibleWords.tsx";
 import { initialState, wordleReducer } from "@/lib/app-reducer.ts";
 
 function App() {
-	const [guessList, setGuessList] = useState([1]);
 	const [state, dispatch] = useReducer(wordleReducer, initialState);
-	return (
-		<div className="flex gap-4">
-			<div>
-				{guessList.map((word) => (
-					<div className="flex gap-2" key={word}>
-						<Guess dispatch={dispatch} />
-						<Button
-							variant="outline"
-							size="icon"
-							className="mt-2 rounded-full"
-							onClick={() =>
-								setGuessList((prev) => {
-									if (prev.length === 6) return prev;
-									return [...prev, prev.length + 1];
-								})
-							}
-						>
-							<Plus />
-						</Button>
-					</div>
-				))}
-			</div>
+	const [resetKey, setResetKey] = useState(0);
 
-			<PossibleWords wordleState={state} />
-		</div>
+	const handleReset = () => {
+		dispatch({ type: "RESET" });
+		setResetKey((prev) => prev + 1);
+	};
+
+	return (
+		<>
+			<div className="flex gap-4">
+				<div>
+					<Guess dispatch={dispatch} key={`0-word-${resetKey}`} />
+					<Guess dispatch={dispatch} key={`1-word-${resetKey}`} />
+					<Guess dispatch={dispatch} key={`2-word-${resetKey}`} />
+					<Guess dispatch={dispatch} key={`3-word-${resetKey}`} />
+					<Guess dispatch={dispatch} key={`4-word-${resetKey}`} />
+				</div>
+
+				<PossibleWords wordleState={state} />
+			</div>
+			<Button className="mt-4" variant="destructive" onClick={handleReset}>
+				Reset
+			</Button>
+		</>
 	);
 }
 
