@@ -25,8 +25,10 @@ export function PossibleWords({ wordleState }: { wordleState: WordleState }) {
 
 		return true;
 	});
+
 	if (!filteredPossibleWords.length) return <p>No possible words left</p>;
 	if (filteredPossibleWords.length > 500) return <p>More than {filteredPossibleWords.length} words...</p>;
+
 	return (
 		<ul className="flex max-w-xl flex-wrap gap-2">
 			{filteredPossibleWords.map((word) => {
