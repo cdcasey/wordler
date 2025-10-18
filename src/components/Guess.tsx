@@ -5,7 +5,7 @@ import { LetterKind } from "@/components/LetterKind.tsx";
 import { cn } from "@/lib/utils.ts";
 import type { WordleAction } from "@/lib/app-reducer.ts";
 
-export function Word({ dispatch }: { dispatch: React.ActionDispatch<[action: WordleAction]> }) {
+export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: WordleAction]> }) {
 	const [word, setWord] = useState([
 		{ letter: "", color: "" },
 		{ letter: "", color: "" },

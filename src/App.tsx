@@ -1,6 +1,6 @@
 import { useReducer, useState } from "react";
 
-import { Word } from "@/components/Word.tsx";
+import { Guess } from "@/components/Guess.tsx";
 import "./App.css";
 import { Button } from "@/components/ui/button.tsx";
 import { Plus } from "lucide-react";
@@ -15,7 +15,7 @@ function App() {
 			<div>
 				{guessList.map((word) => (
 					<div className="flex gap-2" key={word}>
-						<Word dispatch={dispatch} />
+						<Guess dispatch={dispatch} />
 						<Button
 							variant="outline"
 							size="icon"
