@@ -3,8 +3,9 @@ import React, { useRef, useState } from "react";
 import { Input } from "@/components/ui/input.tsx";
 import { LetterKind } from "@/components/LetterKind.tsx";
 import { cn } from "@/lib/utils.ts";
+import type { WordleAction } from "@/lib/app-reducer.ts";
 
-export function Word() {
+export function Word({ dispatch }: { dispatch: React.ActionDispatch<[action: WordleAction]> }) {
 	const [word, setWord] = useState([
 		{ letter: "", color: "" },
 		{ letter: "", color: "" },
@@ -58,6 +59,16 @@ export function Word() {
 	const handleColorClick = (index: number, color: "green" | "yellow" | "gray") => {
 		const tempWord = [...word];
 		tempWord[index].color = color;
+		switch (color) {
+			case "green":
+				dispatch({ type: "ADD_GREEN_LETTER", payload: { letter: tempWord[index].letter, position: index } });
+				break;
+			case "yellow":
+				dispatch({ type: "ADD_YELLOW_LETTER", payload: { letter: tempWord[index].letter, position: index } });
+				break;
+			case "gray":
+				dispatch({ type: "ADD_GRAY_LETTER", payload: { letter: tempWord[index].letter } });
+		}
 		setWord(tempWord);
 	};
 

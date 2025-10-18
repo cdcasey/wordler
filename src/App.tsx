@@ -1,26 +1,27 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 
 import { Word } from "@/components/Word.tsx";
 import "./App.css";
 import { Button } from "@/components/ui/button.tsx";
 import { Plus } from "lucide-react";
 import { PossibleWords } from "@/components/PossibleWords.tsx";
+import { initialState, wordleReducer } from "@/lib/app-reducer.ts";
 
 function App() {
-	const [wordList, setWordList] = useState([1]);
-
+	const [guessList, setGuessList] = useState([1]);
+	const [state, dispatch] = useReducer(wordleReducer, initialState);
 	return (
 		<div className="flex gap-4">
 			<div>
-				{wordList.map((word) => (
+				{guessList.map((word) => (
 					<div className="flex gap-2" key={word}>
-						<Word />
+						<Word dispatch={dispatch} />
 						<Button
 							variant="outline"
 							size="icon"
 							className="mt-2 rounded-full"
 							onClick={() =>
-								setWordList((prev) => {
+								setGuessList((prev) => {
 									if (prev.length === 6) return prev;
 									return [...prev, prev.length + 1];
 								})
@@ -32,7 +33,7 @@ function App() {
 				))}
 			</div>
 
-			<PossibleWords />
+			<PossibleWords wordleState={state} />
 		</div>
 	);
 }
