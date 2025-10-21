@@ -1,9 +1,11 @@
-import possibleWords from "@/lib/words.json";
+// import possibleWords from "@/lib/words.json";
 // import possibleWords from "@/lib/nyt-words.json";
+import possibleWords from "@/lib/possible-words.json";
 import type { WordleState } from "@/lib/app-reducer.ts";
 
 export function PossibleWords({ wordleState }: { wordleState: WordleState }) {
-	const filteredPossibleWords = possibleWords.filter((word) => {
+	const filteredPossibleWords = possibleWords.filter((possibleWord) => {
+		const word = possibleWord;
 		const { gray, yellow, green } = wordleState;
 		if (gray.some((letter) => word.includes(letter))) {
 			return false;
@@ -30,9 +32,13 @@ export function PossibleWords({ wordleState }: { wordleState: WordleState }) {
 	if (filteredPossibleWords.length > 500) return <p>More than {filteredPossibleWords.length} words...</p>;
 
 	return (
-		<ul className="flex max-w-xl flex-wrap gap-2">
+		<ul className="flex max-w-xl flex-wrap content-start gap-2">
 			{filteredPossibleWords.map((word) => {
-				return <li key={word}>{word}</li>;
+				return (
+					<li key={word} className="h-fit">
+						{word}
+					</li>
+				);
 			})}
 		</ul>
 	);
