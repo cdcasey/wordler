@@ -9,7 +9,7 @@ const buttonVariants = cva("stroke-none", {
 		variant: {
 			green: "fill-green-500",
 			yellow: "fill-yellow-500",
-			gray: "fill-gray-300",
+			gray: "fill-gray-500",
 			none: "fill-none stroke-1 stroke-gray-700",
 		},
 	},
