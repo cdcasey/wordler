@@ -1,11 +1,11 @@
 import { useReducer, useState } from "react";
 
 import { Guess } from "@/components/Guess.tsx";
-import "./App.css";
-import { Button } from "@/components/ui/button.tsx";
-
 import { PossibleWords } from "@/components/PossibleWords.tsx";
+import { Button } from "@/components/ui/button.tsx";
 import { initialState, wordleReducer } from "@/lib/app-reducer.ts";
+
+import "./App.css";
 
 function App() {
 	const [state, dispatch] = useReducer(wordleReducer, initialState);
