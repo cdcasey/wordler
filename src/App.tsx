@@ -18,7 +18,7 @@ function App() {
 
 	return (
 		<>
-			<div className="flex gap-4">
+			<div className="flex flex-col gap-8 md:flex-row">
 				<div>
 					<Guess dispatch={dispatch} key={`0-word-${resetKey}`} />
 					<Guess dispatch={dispatch} key={`1-word-${resetKey}`} />
