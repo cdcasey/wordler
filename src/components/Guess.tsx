@@ -66,16 +66,28 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 
 	const handleColorClick = (index: number, color: "green" | "yellow" | "gray") => {
 		const tempWord = [...word];
+		const letter = tempWord[index].letter;
+		const oldColor = tempWord[index].color;
+
+		// Remove old color from state
+		if (oldColor === "green") {
+			dispatch({ type: "REMOVE_GREEN_LETTER", payload: { position: index } });
+		} else if (oldColor === "yellow") {
+			dispatch({ type: "REMOVE_YELLOW_LETTER", payload: { letter, position: index } });
+		} else if (oldColor === "gray") {
+			dispatch({ type: "REMOVE_GRAY_LETTER", payload: { letter } });
+		}
+
 		tempWord[index].color = color;
 		switch (color) {
 			case "green":
-				dispatch({ type: "ADD_GREEN_LETTER", payload: { letter: tempWord[index].letter, position: index } });
+				dispatch({ type: "ADD_GREEN_LETTER", payload: { letter, position: index } });
 				break;
 			case "yellow":
-				dispatch({ type: "ADD_YELLOW_LETTER", payload: { letter: tempWord[index].letter, position: index } });
+				dispatch({ type: "ADD_YELLOW_LETTER", payload: { letter, position: index } });
 				break;
 			case "gray":
-				dispatch({ type: "ADD_GRAY_LETTER", payload: { letter: tempWord[index].letter } });
+				dispatch({ type: "ADD_GRAY_LETTER", payload: { letter } });
 		}
 		setWord(tempWord);
 	};
