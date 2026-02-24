@@ -1,6 +1,6 @@
 // import possibleWords from "@/lib/words.json";
-// import possibleWords from "@/lib/nyt-words.json";
-import possibleWords from "@/lib/possible-words.json";
+import possibleWords from "@/lib/nyt-words.json";
+// import possibleWords from "@/lib/possible-words.json";
 import type { WordleState } from "@/lib/app-reducer.ts";
 
 export function PossibleWords({ wordleState }: { wordleState: WordleState }) {

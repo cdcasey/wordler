@@ -1,12 +1,14 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 
-import { Input } from "@/components/ui/input.tsx";
 import { LetterKind } from "@/components/LetterKind.tsx";
-import { cn } from "@/lib/utils.ts";
+import { Input } from "@/components/ui/input.tsx";
 import type { WordleAction } from "@/lib/app-reducer.ts";
+import { cn } from "@/lib/utils.ts";
+
+type wordLetter = { letter: string; color: "gray" | "yellow" | "green" | "" };
 
 export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: WordleAction]> }) {
-	const [word, setWord] = useState([
+	const [word, setWord] = useState<wordLetter[]>([
 		{ letter: "", color: "" },
 		{ letter: "", color: "" },
 		{ letter: "", color: "" },
@@ -18,7 +20,7 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
 		const value = e.currentTarget.value;
 		const tempWord = [...word];
-		tempWord[index].letter = value;
+		tempWord[index].letter = value.toLowerCase();
 		setWord(tempWord);
 		// If a character is entered and it's not the last field, move to next
 		if (value.length === 1 && index < inputRefs.current.length - 1) {
@@ -26,10 +28,11 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 		}
 	};
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number, letter: wordLetter) => {
+		console.log("DEL", e.currentTarget.value);
 		// Handle backspace - move to previous field
 		if (e.key === "Backspace" && !e.currentTarget.value && index > 0) {
-			inputRefs.current[index - 1]?.focus();
+			// inputRefs.current[index - 1]?.focus();
 		}
 
 		// Handle arrow keys for navigation
@@ -84,14 +87,14 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 						}}
 						type="text"
 						maxLength={1}
-						className={cn("h-13 w-13 rounded-none text-center text-4xl! font-bold uppercase", {
-							"bg-green-500": word[value].color === "green",
-							"bg-yellow-500": word[value].color === "yellow",
-							"bg-gray-300": word[value].color === "gray",
+						className={cn("h-13 w-13 rounded-none text-center text-3xl! font-bold uppercase", {
+							"bg-green-500 text-white": word[value].color === "green",
+							"bg-yellow-500 text-white": word[value].color === "yellow",
+							"bg-gray-500 text-white": word[value].color === "gray",
 						})}
 						value={word[value].letter}
 						onChange={(e) => handleChange(e, value)}
-						onKeyDown={(e) => handleKeyDown(e, value)}
+						onKeyDown={(e) => handleKeyDown(e, value, word[value])}
 						onPaste={handlePaste}
 					/>
 					<div>
