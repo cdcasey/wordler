@@ -120,14 +120,10 @@ export function wordleReducer(state: WordleState, action: WordleAction): WordleS
 
 		case "ADD_GRAY_LETTER": {
 			const { letter } = action.payload;
-			// Only add if not already in gray list
-			if (!state.gray.includes(letter)) {
-				return {
-					...state,
-					gray: [...state.gray, letter],
-				};
-			}
-			return state;
+			return {
+				...state,
+				gray: [...state.gray, letter],
+			};
 		}
 
 		case "REMOVE_GREEN_LETTER": {
@@ -149,9 +145,10 @@ export function wordleReducer(state: WordleState, action: WordleAction): WordleS
 
 		case "REMOVE_GRAY_LETTER": {
 			const { letter } = action.payload;
+			const idx = state.gray.indexOf(letter);
 			return {
 				...state,
-				gray: state.gray.filter(l => l !== letter),
+				gray: idx >= 0 ? state.gray.toSpliced(idx, 1) : state.gray,
 			};
 		}
 
@@ -160,12 +157,13 @@ export function wordleReducer(state: WordleState, action: WordleAction): WordleS
 			return initialState;
 
 		case "CLEAR_POSITION": {
-			// Clear all letter data at a specific position
+			// Clear all letter data at a specific position (removes only one gray instance)
 			const { letter, position: pos } = action.payload;
+			const grayIdx = state.gray.indexOf(letter);
 			return {
 				green: state.green.map((l, i) => i === pos ? null : l),
 				yellow: state.yellow.filter(y => y.position !== pos),
-				gray: state.gray.filter(l => l !== letter),
+				gray: grayIdx >= 0 ? state.gray.toSpliced(grayIdx, 1) : state.gray,
 			};
 		}
 
