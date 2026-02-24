@@ -93,7 +93,7 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 	};
 
 	return (
-		<div className="flex gap-2">
+		<div className="flex gap-2.5">
 			{[0, 1, 2, 3, 4].map((value) => (
 				<div className="flex flex-col gap-2 text-center" key={value}>
 					<Input
@@ -104,7 +104,7 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 						}}
 						type="text"
 						maxLength={1}
-						className={cn("h-13 w-13 rounded-none text-center text-3xl! font-bold uppercase", {
+						className={cn("h-14 w-14 rounded-none text-center text-3xl! font-bold uppercase", {
 							"bg-green-500 text-white": word[value].color === "green",
 							"bg-yellow-500 text-white": word[value].color === "yellow",
 							"bg-gray-500 text-white": word[value].color === "gray",
@@ -114,7 +114,7 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 						onKeyDown={(e) => handleKeyDown(e, value, word[value])}
 						onPaste={handlePaste}
 					/>
-					<div>
+					<div className="mb-4 flex justify-between">
 						<LetterKind
 							variant="green"
 							selected={word[value].color === "green"}

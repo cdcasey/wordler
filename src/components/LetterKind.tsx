@@ -24,7 +24,13 @@ interface LetterKindProps extends React.ComponentProps<"button">, VariantProps<t
 
 export function LetterKind({ selected, className, variant, ...props }: LetterKindProps) {
 	return (
-		<Button variant="ghost" size="icon" tabIndex={-1} className={cn("h-fit w-fit rounded-full", className)} {...props}>
+		<Button
+			variant="ghost"
+			size="icon-lg"
+			tabIndex={-1}
+			className={cn("h-fit w-fit rounded-full", className)}
+			{...props}
+		>
 			<CircleIcon className={cn(buttonVariants({ variant }), selected && "stroke-gray-500 stroke-1")} />
 		</Button>
 	);
