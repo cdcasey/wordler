@@ -4,6 +4,7 @@ import { LetterKind } from "@/components/LetterKind.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import type { WordleAction } from "@/lib/app-reducer.ts";
 import { cn } from "@/lib/utils.ts";
+import { LogIn } from "lucide-react";
 
 type wordLetter = { letter: string; color: "gray" | "yellow" | "green" | "" };
 
@@ -29,10 +30,14 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number, letter: wordLetter) => {
-		console.log("DEL", e.currentTarget.value);
-		// Handle backspace - move to previous field
-		if (e.key === "Backspace" && !e.currentTarget.value && index > 0) {
-			// inputRefs.current[index - 1]?.focus();
+		// Handle backspace - clear color and letter data
+		if (e.key === "Backspace") {
+			if (letter.color !== "") {
+				dispatch({ type: "CLEAR_POSITION", payload: { letter: letter.letter, position: index } });
+				const tempWord = [...word];
+				tempWord[index].color = "";
+				setWord(tempWord);
+			}
 		}
 
 		// Handle arrow keys for navigation

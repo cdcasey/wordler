@@ -63,6 +63,7 @@ type ResetAction = {
 type ClearPositionAction = {
 	type: "CLEAR_POSITION";
 	payload: {
+		letter: string;
 		position: number;
 	};
 };
@@ -159,12 +160,12 @@ export function wordleReducer(state: WordleState, action: WordleAction): WordleS
 			return initialState;
 
 		case "CLEAR_POSITION": {
-			// Clear all letters at a specific position
-			const pos = action.payload.position;
+			// Clear all letter data at a specific position
+			const { letter, position: pos } = action.payload;
 			return {
 				green: state.green.map((l, i) => i === pos ? null : l),
 				yellow: state.yellow.filter(y => y.position !== pos),
-				gray: state.gray,
+				gray: state.gray.filter(l => l !== letter),
 			};
 		}
 
