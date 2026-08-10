@@ -1,35 +1,32 @@
-import { useReducer, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 import { Guess } from "@/components/Guess.tsx";
 import { PossibleWords } from "@/components/PossibleWords.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { initialState, wordleReducer } from "@/lib/app-reducer.ts";
+import { wordleReducer } from "@/lib/app-reducer.ts";
+import { loadState, saveState } from "@/lib/storage.ts";
 
 import "./App.css";
 
 function App() {
-	const [state, dispatch] = useReducer(wordleReducer, initialState);
-	const [resetKey, setResetKey] = useState(0);
+	const [state, dispatch] = useReducer(wordleReducer, undefined, loadState);
 
-	const handleReset = () => {
-		dispatch({ type: "RESET" });
-		setResetKey((prev) => prev + 1);
-	};
+	useEffect(() => {
+		saveState(state);
+	}, [state]);
 
 	return (
 		<>
 			<div className="flex flex-col gap-8 md:flex-row">
 				<div>
-					<Guess dispatch={dispatch} key={`0-word-${resetKey}`} />
-					<Guess dispatch={dispatch} key={`1-word-${resetKey}`} />
-					<Guess dispatch={dispatch} key={`2-word-${resetKey}`} />
-					<Guess dispatch={dispatch} key={`3-word-${resetKey}`} />
-					<Guess dispatch={dispatch} key={`4-word-${resetKey}`} />
+					{state.rows.map((row, index) => (
+						<Guess dispatch={dispatch} key={index} row={row} rowIndex={index} />
+					))}
 				</div>
 
 				<PossibleWords wordleState={state} />
 			</div>
-			<Button className="mt-4" variant="destructive" onClick={handleReset}>
+			<Button className="mt-4" variant="destructive" onClick={() => dispatch({ type: "RESET" })}>
 				Reset
 			</Button>
 		</>

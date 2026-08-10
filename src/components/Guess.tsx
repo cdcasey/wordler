@@ -1,42 +1,34 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 import { LetterKind } from "@/components/LetterKind.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import type { WordleAction } from "@/lib/app-reducer.ts";
+import type { GridLetter, WordleAction } from "@/lib/app-reducer.ts";
+import { WORD_LENGTH } from "@/lib/app-reducer.ts";
 import { cn } from "@/lib/utils.ts";
 
-type wordLetter = { letter: string; color: "gray" | "yellow" | "green" | "" };
+interface GuessProps {
+	row: GridLetter[];
+	rowIndex: number;
+	dispatch: React.ActionDispatch<[action: WordleAction]>;
+}
 
-export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: WordleAction]> }) {
-	const [word, setWord] = useState<wordLetter[]>([
-		{ letter: "", color: "" },
-		{ letter: "", color: "" },
-		{ letter: "", color: "" },
-		{ letter: "", color: "" },
-		{ letter: "", color: "" },
-	]);
+export function Guess({ row, rowIndex, dispatch }: GuessProps) {
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
 		const value = e.currentTarget.value;
-		const tempWord = [...word];
-		tempWord[index].letter = value.toLowerCase();
-		setWord(tempWord);
+		dispatch({ type: "SET_LETTER", payload: { row: rowIndex, position: index, letter: value } });
 		// If a character is entered and it's not the last field, move to next
 		if (value.length === 1 && index < inputRefs.current.length - 1) {
 			inputRefs.current[index + 1]?.focus();
 		}
 	};
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number, letter: wordLetter) => {
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number, letter: GridLetter) => {
 		// Handle backspace - clear color and letter data
-		if (e.key === "Backspace") {
-			if (letter.color !== "") {
-				dispatch({ type: "CLEAR_POSITION", payload: { letter: letter.letter, position: index } });
-				const tempWord = [...word];
-				tempWord[index].color = "";
-				setWord(tempWord);
-			}
+		if (e.key === "Backspace" && !letter.letter && index > 0) {
+			dispatch({ type: "CLEAR_POSITION", payload: { row: rowIndex, position: index - 1 } });
+			inputRefs.current[index - 1]?.focus();
 		}
 
 		// Handle arrow keys for navigation
@@ -48,55 +40,28 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 		}
 	};
 
-	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+	const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
 		e.preventDefault();
-		const pastedData = e.clipboardData.getData("text").toUpperCase().split("");
+		const pasted = e.clipboardData.getData("text").replace(/[^a-z]/gi, "").split("");
 
-		pastedData.forEach((char: string, index: number) => {
-			if (index < inputRefs.current.length && inputRefs.current[index]) {
-				inputRefs.current[index].value = char;
-			}
+		pasted.slice(0, WORD_LENGTH - index).forEach((char, offset) => {
+			dispatch({ type: "SET_LETTER", payload: { row: rowIndex, position: index + offset, letter: char } });
 		});
 
 		// Focus the last field or the field after the pasted data
-		const focusIndex = Math.min(pastedData.length, inputRefs.current.length - 1);
+		const focusIndex = Math.min(index + pasted.length, WORD_LENGTH - 1);
 		inputRefs.current[focusIndex]?.focus();
 	};
 
 	const handleColorClick = (index: number, color: "green" | "yellow" | "gray") => {
-		const tempWord = [...word];
-		const letter = tempWord[index].letter;
-		const oldColor = tempWord[index].color;
-
-		// Remove old color from state
-		if (oldColor === "green") {
-			dispatch({ type: "REMOVE_GREEN_LETTER", payload: { position: index } });
-		} else if (oldColor === "yellow") {
-			dispatch({ type: "REMOVE_YELLOW_LETTER", payload: { letter, position: index } });
-		} else if (oldColor === "gray") {
-			dispatch({ type: "REMOVE_GRAY_LETTER", payload: { letter } });
-		}
-
-		tempWord[index].color = color;
-		switch (color) {
-			case "green":
-				dispatch({ type: "ADD_GREEN_LETTER", payload: { letter, position: index } });
-				break;
-			case "yellow":
-				dispatch({ type: "ADD_YELLOW_LETTER", payload: { letter, position: index } });
-				break;
-			case "gray":
-				dispatch({ type: "ADD_GRAY_LETTER", payload: { letter } });
-		}
-		setWord(tempWord);
+		dispatch({ type: "SET_COLOR", payload: { row: rowIndex, position: index, color } });
 	};
 
 	return (
 		<div className="flex gap-2.5">
-			{[0, 1, 2, 3, 4].map((value) => (
+			{row.map((cell, value) => (
 				<div className="flex flex-col gap-2 text-center" key={value}>
 					<Input
-						// ref={inputRefs.current[value]}
 						ref={(el) => {
 							inputRefs.current[value] = el;
 							return;
@@ -104,29 +69,29 @@ export function Guess({ dispatch }: { dispatch: React.ActionDispatch<[action: Wo
 						type="text"
 						maxLength={1}
 						className={cn("h-14 w-14 rounded-none border-gray-300 text-center text-3xl! font-bold uppercase", {
-							"bg-green-500 text-white": word[value].color === "green",
-							"bg-yellow-500 text-white": word[value].color === "yellow",
-							"bg-gray-500 text-white": word[value].color === "gray",
+							"bg-green-500 text-white": cell.color === "green",
+							"bg-yellow-500 text-white": cell.color === "yellow",
+							"bg-gray-500 text-white": cell.color === "gray",
 						})}
-						value={word[value].letter}
+						value={cell.letter}
 						onChange={(e) => handleChange(e, value)}
-						onKeyDown={(e) => handleKeyDown(e, value, word[value])}
-						onPaste={handlePaste}
+						onKeyDown={(e) => handleKeyDown(e, value, cell)}
+						onPaste={(e) => handlePaste(e, value)}
 					/>
 					<div className="mb-4 flex justify-between">
 						<LetterKind
 							variant="green"
-							selected={word[value].color === "green"}
+							selected={cell.color === "green"}
 							onClick={() => handleColorClick(value, "green")}
 						/>
 						<LetterKind
 							variant="yellow"
-							selected={word[value].color === "yellow"}
+							selected={cell.color === "yellow"}
 							onClick={() => handleColorClick(value, "yellow")}
 						/>
 						<LetterKind
 							variant="gray"
-							selected={word[value].color === "gray"}
+							selected={cell.color === "gray"}
 							onClick={() => handleColorClick(value, "gray")}
 						/>
 					</div>

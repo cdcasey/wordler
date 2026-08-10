@@ -4,55 +4,49 @@ export interface YellowLetter {
 	position: number;
 }
 
+export type LetterColor = "gray" | "yellow" | "green" | "";
+
+export interface GridLetter {
+	letter: string;
+	color: LetterColor;
+}
+
+export const ROW_COUNT = 5;
+export const WORD_LENGTH = 5;
+
 export interface WordleState {
+	// Raw grid input — the source of truth. green/yellow/gray below are
+	// projections of this, maintained by the reducer for PossibleWords.
+	rows: GridLetter[][];
 	green: (string | null)[];
 	yellow: YellowLetter[];
 	gray: string[];
 }
 
 // Action types
-type AddGreenLetterAction = {
-	type: "ADD_GREEN_LETTER";
+type SetLetterAction = {
+	type: "SET_LETTER";
 	payload: {
-		letter: string;
+		row: number;
 		position: number;
+		letter: string;
 	};
 };
 
-type AddYellowLetterAction = {
-	type: "ADD_YELLOW_LETTER";
+type SetColorAction = {
+	type: "SET_COLOR";
 	payload: {
-		letter: string;
+		row: number;
 		position: number;
+		color: LetterColor;
 	};
 };
 
-type AddGrayLetterAction = {
-	type: "ADD_GRAY_LETTER";
+type ClearPositionAction = {
+	type: "CLEAR_POSITION";
 	payload: {
-		letter: string;
-	};
-};
-
-type RemoveGreenLetterAction = {
-	type: "REMOVE_GREEN_LETTER";
-	payload: {
+		row: number;
 		position: number;
-	};
-};
-
-type RemoveYellowLetterAction = {
-	type: "REMOVE_YELLOW_LETTER";
-	payload: {
-		letter: string;
-		position: number;
-	};
-};
-
-type RemoveGrayLetterAction = {
-	type: "REMOVE_GRAY_LETTER";
-	payload: {
-		letter: string;
 	};
 };
 
@@ -60,112 +54,104 @@ type ResetAction = {
 	type: "RESET";
 };
 
-type ClearPositionAction = {
-	type: "CLEAR_POSITION";
-	payload: {
-		letter: string;
-		position: number;
-	};
-};
+export type WordleAction = SetLetterAction | SetColorAction | ClearPositionAction | ResetAction;
 
-export type WordleAction =
-	| AddGreenLetterAction
-	| AddYellowLetterAction
-	| AddGrayLetterAction
-	| RemoveGreenLetterAction
-	| RemoveYellowLetterAction
-	| RemoveGrayLetterAction
-	| ResetAction
-	| ClearPositionAction;
+export function emptyRows(): GridLetter[][] {
+	return Array.from({ length: ROW_COUNT }, () =>
+		Array.from({ length: WORD_LENGTH }, (): GridLetter => ({ letter: "", color: "" })),
+	);
+}
 
 // Initial state for the Wordle helper
 export const initialState: WordleState = {
+	rows: emptyRows(),
 	green: [null, null, null, null, null], // Fixed positions for correct letters
 	yellow: [], // Array of {letter, position} objects
 	gray: [], // Array of excluded letters
 };
 
+// Rebuild the green/yellow/gray filters from the grid. Deriving these in one
+// pass keeps them consistent no matter how the grid was edited.
+function project(rows: GridLetter[][]): Omit<WordleState, "rows"> {
+	const green: (string | null)[] = Array.from({ length: WORD_LENGTH }, () => null);
+	const yellow: YellowLetter[] = [];
+	const grayCandidates: string[] = [];
+	const present = new Set<string>();
+
+	for (const row of rows) {
+		row.forEach(({ letter, color }, position) => {
+			if (!letter) return;
+			switch (color) {
+				case "green":
+					green[position] = letter;
+					present.add(letter);
+					break;
+				case "yellow":
+					if (!yellow.some(y => y.letter === letter && y.position === position)) {
+						yellow.push({ letter, position });
+					}
+					present.add(letter);
+					break;
+				case "gray":
+					grayCandidates.push(letter);
+					break;
+			}
+		});
+	}
+
+	// A letter marked gray elsewhere is still in the word if it's green/yellow
+	// somewhere, so only exclude letters that are never present.
+	const gray = [...new Set(grayCandidates)].filter(letter => !present.has(letter));
+
+	return { green, yellow, gray };
+}
+
+export function withRows(rows: GridLetter[][]): WordleState {
+	return { rows, ...project(rows) };
+}
+
+// Replace a single cell without mutating the previous state.
+function updateCell(
+	state: WordleState,
+	row: number,
+	position: number,
+	patch: Partial<GridLetter>,
+): WordleState {
+	if (!state.rows[row]?.[position]) return state;
+
+	const rows = state.rows.map((cells, r) =>
+		r === row ? cells.map((cell, c) => (c === position ? { ...cell, ...patch } : cell)) : cells,
+	);
+
+	return withRows(rows);
+}
+
 // Reducer function to manage Wordle guess state
 export function wordleReducer(state: WordleState, action: WordleAction): WordleState {
 	switch (action.type) {
-		case "ADD_GREEN_LETTER": {
-			const { letter, position } = action.payload;
-			const newGreen = [...state.green];
-			newGreen[position] = letter;
-			return {
-				...state,
-				green: newGreen,
-				// Remove from yellow if it was there
-				yellow: state.yellow.filter(y =>
-					!(y.letter === letter && y.position === position),
-				),
-			};
+		case "SET_LETTER": {
+			const { row, position, letter } = action.payload;
+			const next = letter.toLowerCase();
+			// An emptied cell can't carry a constraint.
+			return updateCell(state, row, position, next ? { letter: next } : { letter: "", color: "" });
 		}
 
-		case "ADD_YELLOW_LETTER": {
-			const { letter, position } = action.payload;
-			// Check if this letter/position combo already exists
-			const exists = state.yellow.some(y =>
-				y.letter === letter && y.position === position,
-			);
-
-			if (!exists) {
-				return {
-					...state,
-					yellow: [...state.yellow, { letter, position }],
-				};
-			}
-			return state;
+		case "SET_COLOR": {
+			const { row, position, color } = action.payload;
+			// Clicking the active color again clears it.
+			const current = state.rows[row]?.[position];
+			if (!current?.letter) return state;
+			return updateCell(state, row, position, { color: current.color === color ? "" : color });
 		}
 
-		case "ADD_GRAY_LETTER": {
-			const { letter } = action.payload;
-			return {
-				...state,
-				gray: [...state.gray, letter],
-			};
-		}
-
-		case "REMOVE_GREEN_LETTER": {
-			const { position } = action.payload;
-			const newGreen = [...state.green];
-			newGreen[position] = null;
-			return { ...state, green: newGreen };
-		}
-
-		case "REMOVE_YELLOW_LETTER": {
-			const { letter, position } = action.payload;
-			return {
-				...state,
-				yellow: state.yellow.filter(y =>
-					!(y.letter === letter && y.position === position),
-				),
-			};
-		}
-
-		case "REMOVE_GRAY_LETTER": {
-			const { letter } = action.payload;
-			const idx = state.gray.indexOf(letter);
-			return {
-				...state,
-				gray: idx >= 0 ? state.gray.toSpliced(idx, 1) : state.gray,
-			};
+		case "CLEAR_POSITION": {
+			const { row, position } = action.payload;
+			return updateCell(state, row, position, { letter: "", color: "" });
 		}
 
 		case "RESET":
 			// Reset all state to initial values
-			return initialState;
-
-		case "CLEAR_POSITION": {
-			// Clear all letter data at a specific position (removes only one gray instance)
-			const { letter, position: pos } = action.payload;
-			const grayIdx = state.gray.indexOf(letter);
-			return {
-				green: state.green.map((l, i) => i === pos ? null : l),
-				yellow: state.yellow.filter(y => y.position !== pos),
-				gray: grayIdx >= 0 ? state.gray.toSpliced(grayIdx, 1) : state.gray,
-			};
-		}
+			return withRows(emptyRows());
 
 		default:
 			return state;
@@ -175,8 +161,7 @@ export function wordleReducer(state: WordleState, action: WordleAction): WordleS
 // Usage examples:
 // const [state, dispatch] = useReducer(wordleReducer, initialState);
 //
-// dispatch({ type: 'ADD_GREEN_LETTER', payload: { letter: 'r', position: 0 } });
-// dispatch({ type: 'ADD_YELLOW_LETTER', payload: { letter: 's', position: 1 } });
-// dispatch({ type: 'ADD_GRAY_LETTER', payload: { letter: 't' } });
-// dispatch({ type: 'REMOVE_GREEN_LETTER', payload: { position: 0 } });
+// dispatch({ type: 'SET_LETTER', payload: { row: 0, position: 0, letter: 'r' } });
+// dispatch({ type: 'SET_COLOR', payload: { row: 0, position: 0, color: 'green' } });
+// dispatch({ type: 'CLEAR_POSITION', payload: { row: 0, position: 0 } });
 // dispatch({ type: 'RESET' });
