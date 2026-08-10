@@ -4,7 +4,6 @@ import { LetterKind } from "@/components/LetterKind.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import type { WordleAction } from "@/lib/app-reducer.ts";
 import { cn } from "@/lib/utils.ts";
-import { LogIn } from "lucide-react";
 
 type wordLetter = { letter: string; color: "gray" | "yellow" | "green" | "" };
 
