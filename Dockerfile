@@ -3,7 +3,7 @@
 # ---- deps ------------------------------------------------------------------
 # Dependencies land in their own layer so they're only reinstalled when the
 # lockfile changes, not on every source edit.
-FROM node:22-alpine AS deps
+FROM node:24-alpine AS deps
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
