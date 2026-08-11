@@ -1,0 +1,30 @@
+services:
+  wordler:
+    build:
+      context: .
+      target: prod
+    image: wordler:latest
+    container_name: wordler
+    # Survives a host reboot, but only once OrbStack itself starts — see README.
+    restart: unless-stopped
+    ports:
+      # Host 8080 -> nginx 80. Change the left side to move it; Caddy will
+      # reverse_proxy to whatever this is.
+      - "8080:80"
+
+  # Opt-in live-reload server: docker compose --profile dev up wordler-dev
+  # Not started by a bare `docker compose up -d`.
+  wordler-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      target: dev
+    container_name: wordler-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      # Anonymous volume keeps the image's Linux node_modules from being
+      # shadowed by the macOS ones in the bind mount.
+      - /app/node_modules

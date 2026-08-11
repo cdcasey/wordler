@@ -1,0 +1,18 @@
+# Rebuilt inside the image; the host copies are macOS-native and would both
+# bloat the build context and risk masking a fresh build.
+node_modules
+dist
+dist-ssr
+
+.git
+.idea
+.vscode
+.zed
+.qodo
+.DS_Store
+*.log
+
+Dockerfile
+docker-compose.yml
+.dockerignore
+README.md

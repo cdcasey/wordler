@@ -1,6 +1,77 @@
-# React + TypeScript + Vite
+# Wordler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Wordle helper. Enter your guesses, mark each letter green/yellow/gray, and it
+filters the remaining possible words. State persists to localStorage.
+
+```sh
+pnpm install
+pnpm dev          # http://localhost:5173
+pnpm test         # reducer + storage tests
+```
+
+## Deploying to the Mac mini
+
+Static bundle served by Caddy in a container, intended to sit behind the Caddy
+instance on the host. Same config syntax in both places, on purpose.
+
+```sh
+docker compose up -d --build      # production, http://<host>:8080
+docker compose logs -f wordler
+docker compose down
+```
+
+Live-reload server instead of the static build (bind-mounts source, port 5173):
+
+```sh
+docker compose --profile dev up wordler-dev
+```
+
+### Surviving a reboot
+
+`restart: unless-stopped` brings the container back when the Docker daemon
+starts — but OrbStack is a user app that starts at **login**, not at boot. On a
+headless box that means nothing comes back until someone logs in.
+
+Fix it once, at the host level, and it covers every container:
+
+**System Settings → Users & Groups → Automatic login → <your user>**
+
+(FileVault blocks auto-login on Apple silicon; disable it or use a LaunchDaemon
+instead if the disk must stay encrypted.)
+
+Verify with `sudo reboot`, then from another machine: `curl -I http://<host>:8080`.
+
+### Caddy
+
+There are two Caddyfiles, doing different jobs:
+
+- `./Caddyfile` — baked into the image, serves the static files on port 80
+  inside the container. Already done.
+- The host Caddyfile on the mini — terminates TLS and proxies to the container.
+  Not yet set up. When it is, add:
+
+```caddyfile
+wordler.<tailnet>.ts.net {
+	reverse_proxy localhost:8080
+}
+```
+
+The container stays on 8080 and needs no changes. To keep the port off the LAN
+entirely once Caddy fronts it, bind to loopback in `docker-compose.yml`:
+`- "127.0.0.1:8080:80"`.
+
+## Notes
+
+- `pnpm build` runs `tsc -b && vite build`; `tsc -b` currently fails with
+  TS5102 (`baseUrl` removed in TS 7) from `tsconfig.app.json`. The Dockerfile
+  calls `vite build` directly to work around it. Drop `baseUrl` from
+  `tsconfig.app.json` and the Dockerfile can go back to `pnpm build`.
+- `pnpm lint` is also broken independently: typescript-eslint 8.66 doesn't
+  support TS 7.
+
+---
+
+This project was bootstrapped with the React + TypeScript + Vite template.
 
 Currently, two official plugins are available:
 

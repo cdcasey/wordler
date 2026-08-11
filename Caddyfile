@@ -1,0 +1,23 @@
+# Static file server for the built bundle. TLS and the public hostname are
+# handled by Caddy on the host, which reverse-proxies to this container.
+:80 {
+	root * /srv
+	file_server
+	encode zstd gzip
+
+	log {
+		output stdout
+		format console
+	}
+
+	# Vite fingerprints everything under /assets/, so those can cache forever.
+	# Everything else — chiefly the entry point, reachable as both "/" and
+	# "/index.html" — must not be cached, or a stale copy would keep pointing
+	# at asset filenames a rebuilt image no longer has.
+	# The two matchers are mutually exclusive rather than layered, because
+	# `header` applies the first matching rule, not the last.
+	@assets path /assets/*
+	@notAssets not path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+	header @notAssets Cache-Control "no-cache"
+}
